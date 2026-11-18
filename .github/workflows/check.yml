@@ -1,0 +1,36 @@
+name: Check shell toolbox
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test dependencies and pinned upstream fixture
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y busybox gnupg shellcheck rsync
+          mkdir -p .cache
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 \
+            -o .cache/reinstall-8ac9db68.tar.gz \
+            https://codeload.github.com/bin456789/reinstall/tar.gz/8ac9db68f9bca0b26c4143b2f3e206f2aa342d6b
+          echo 'e16ac96823636556b0281ca85074f29c534e8c3f0be0c6b30c26a44eb5bb86bb  .cache/reinstall-8ac9db68.tar.gz' | sha256sum -c -
+      - name: Embedded sources are synchronized
+        run: |
+          python3 tools/sync_embedded.py
+          git diff --exit-code -- bbr.sh dd.sh
+          sha256sum -c SHA256SUMS
+      - name: Syntax and static analysis
+        run: |
+          bash -n bbr.sh
+          bash -n dd.sh
+          shellcheck bbr.sh dd.sh tools/dd_resources.sh tools/dd_disk.sh tools/dd_runtime.sh tools/dd_packages.sh
+          shellcheck tools/build_release.sh tools/release/guest.sh tools/release/sync_sources.sh
+          shellcheck tools/build_nginx.sh
+      - name: Isolated regression tests
+        run: python3 -m unittest discover -s tests -v

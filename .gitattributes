@@ -1,0 +1,19 @@
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.gpg -text
+*.patch text eol=lf -whitespace
+*.inc text eol=lf
+*.json text eol=lf
+*.config text eol=lf
+*.log text eol=lf -whitespace
+.gitattributes text eol=lf
+.gitignore text eol=lf
+SHA256SUMS text eol=lf
+tools/release/config-amd64 text eol=lf
+# Preserve the byte-frozen R5 oracle used by hot-path equivalence tests.
+tests/fixtures/guard_r5_hotpath_reference.h text eol=lf -whitespace
